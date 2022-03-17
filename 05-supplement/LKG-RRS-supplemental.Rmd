@@ -1,0 +1,653 @@
+---
+title: "Supplemental Material"
+subtitle: "_Improved productivity of naturalized spring Chinook salmon following reintroduction using a hatchery stock into Lookingglass Creek, Oregon_"
+author: "H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower"
+output: 
+  bookdown::html_document2:
+    number_sections: FALSE
+params:
+  do_DHARMa: 
+    value: TRUE
+date: "`r lubridate::today()`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r load-packages, echo = FALSE}
+library(knitr)
+library(kableExtra)
+library(details)
+set.seed(1234)
+```
+
+```{r knitr-setup, include = FALSE}
+opts_chunk$set(echo = FALSE, fig.align = "center")
+opts_knit$set(root.dir = "../")
+```
+
+```{r load-data}
+# prepare the data set
+# all of this y_variable/y_var business was used in model fitting
+# it allowed the same code to be used to the same models to multiple progeny types
+# it is required to prepare the data set, but not used here.
+y_variable = "total_juv"; do_not_rm = c("y_variable", "params")
+source("01-main-RRS/00-data-prep.R")
+dat = dat[,-which(colnames(dat) == "y_var")]
+
+# load the functions used in multiple analyses
+source("common-functions.R")
+```
+
+```{r output-dirs}
+Q1_out_dir = "01-main-RRS/model-output"
+Q1_fig_dir = "01-main-RRS/figures"
+Q2_out_dir = "02-grand-RRS/model-output"
+Q2_fig_dir = "02-grand-RRS/figures"
+Q3_out_dir = "03-cross-types/model-output"
+Q4_out_dir = "04-adult-vs-juv"
+```
+
+```{r fitted-models}
+Q1_juv_fit = readRDS(file.path(Q1_out_dir, "total_juv", "total_juv-best-fit.rds"))
+Q1_adult_fit = readRDS(file.path(Q1_out_dir, "adult", "adult-best-fit.rds"))
+Q2_juv_fit = readRDS(file.path(Q2_out_dir, "total_juv_grand", "total_juv_grand-best-fit.rds"))
+Q2_adult_fit = readRDS(file.path(Q2_out_dir, "adult_grand", "adult_grand-best-fit.rds"))
+Q3_juv_fit = readRDS(file.path(Q3_out_dir, "Juv-best-fit.rds"))
+Q3_adult_fit = readRDS(file.path(Q3_out_dir, "Adult-best-fit.rds"))
+Q4_fit = readRDS(file.path(Q4_out_dir, "model.rds"))
+```
+
+# Raw Data Summaries {.tabset .tabset-pills}
+
+These tables show some key raw data summaries relevant to our inferences.
+The column headers are as follows, all presented separately for HOR and NOR spawners:
+
+* **Spawners**: the number of spawners sampled each year
+* **% Zero**: the percentage of sampled spawners with no progeny assigned
+* **Mean > 0**: the mean number of progeny assigned to spawners that had at least one progeny assigned
+* **Mean**: the mean number of progeny assigned to spawners, regardless of whether they had any progeny assigned or not
+
+The **All Years** row shows the values obtained by aggregating all years.
+
+```{r summary_table-fn}
+summary_table = function(progeny_keep) {
+  n = tapply(dat[,progeny_keep], list(dat$year, dat$origin), length); colnames(n) = paste0(colnames(n), "_n")
+  p0 = tapply(dat[,progeny_keep], list(dat$year, dat$origin), function(x) paste0(round(mean(x == 0), 3) * 100, "%")); colnames(p0) = paste0(colnames(p0), "_p0")
+  mn0 = tapply(dat[,progeny_keep], list(dat$year, dat$origin), function(x) round(mean(x[x > 0]), 2)); colnames(mn0) = paste0(colnames(mn0), "_mn0")
+  mn = tapply(dat[,progeny_keep], list(dat$year, dat$origin), function(x) round(mean(x), 2)); colnames(mn) = paste0(colnames(mn0), "_mn")
+  
+  all_n = tapply(dat[,progeny_keep], list(dat$origin), length); names(all_n) = paste0(names(all_n), "_n")
+  all_p0 = tapply(dat[,progeny_keep], list(dat$origin), function(x) paste0(round(mean(x == 0), 3) * 100, "%")); names(all_p0) = paste0(names(all_p0), "_p0")
+  all_mn0 = tapply(dat[,progeny_keep], list(dat$origin), function(x) round(mean(x[x > 0]), 2)); names(mn0) = paste0(names(mn0), "_mn0")
+  all_mn = tapply(dat[,progeny_keep], list(dat$origin), function(x) round(mean(x), 2)); names(all_mn) = paste0(names(all_mn), "_mn")
+  
+  tab = cbind(n, p0, mn0, mn)
+  tab = rbind(tab, "All Years" = c(all_n, all_p0, all_mn0, all_mn))
+  
+  knitr::kable(tab, col.names = rep(c("HOR", "NOR"), 4), align = "c") %>%
+    kable_styling(full_width = FALSE, bootstrap_options = c("condensed", "striped")) %>%
+    add_header_above(c(" " = 1, "Spawners" = 2, "% Zero" = 2, "Mean > 0" = 2, "Mean" = 2)) %>%
+    column_spec(1, bold = TRUE) %>%
+    row_spec(nrow(tab), bold = TRUE)
+}
+```
+
+## **Table S1a.** Juvenile Progeny
+
+```{r tot_juv_summary_table}
+summary_table("total_juv")
+```
+
+## **Table S1b.** Adult Progeny
+
+```{r adult_summary_table}
+summary_table("adult")
+```
+
+# Progeny Per Spawner Histograms {.tabset .tabset-pills}
+
+```{r hist-fn}
+hist_fn = function(year_keep, progeny_type, axis_by) {
+  # extract the progeny counts for this year and type
+  y = subset(dat, year == year_keep)[,progeny_type]
+  
+  # build a histogram in increments of 1 (including 0 group)
+  z = factor(y, levels = 0:max(y))
+  counts = table(z)
+  mp = barplot(as.numeric(counts), space = 0, col = "grey50", border = "white", main = year_keep)
+  
+  # create axis
+  mp = as.numeric(mp)
+  names(mp) = names(counts)
+  lab_x = as.character(seq(0, max(y), axis_by))
+  axis(side = 1, at = mp[lab_x], labels = lab_x, xpd = F)
+}
+```
+
+## **Figure S1a.** Juvenile Progeny
+
+```{r total_juv-hist, fig.width = 8, fig.height = 7}
+par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
+x = sapply(2008:2016, function(y) hist_fn(y, "total_juv", 5))
+mtext(side = 1, outer = TRUE, line = 0.75, "Number of Juvenile Progeny Assigned")
+mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
+```
+
+## **Figure S1b.** Adult Progeny
+
+```{r adult-hist, fig.width = 8, fig.height = 7}
+par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
+x = sapply(2008:2016, function(y) hist_fn(y, "adult", 1))
+mtext(side = 1, outer = TRUE, line = 0.75, "Number of Adult Progeny Assigned")
+mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
+```
+
+# GLM Residual Diagnostics {.tabset .tabset-dropdown}
+
+We fitted many generalized linear models for our analysis and we based our inferences of statistical importance primarily on (a) AIC~c~ model selection and (b) confidence intervals of ratios derived from model-predicted reproductive success values.
+These inferences, especially those based on confidence intervals, may be biased if the data do not conform to the assumptions of the statistical model; e.g., if they show more or less variability than is expected by the model.
+Thus, it is important to check that the assumptions of the best models for each analysis were met.
+
+However, assumption checking via residual diagnostics from GL(M)Ms is difficult.
+This is due primarily to the wide variety of response distributions that these models can use: the model-predicted value is not often a good representation of the spread of the distribution the data are assumed to take on, so standard plots of observed vs. predicted values can be misleading, as can residual vs. predicted plots.
+Further, in applying GLMs, we often need to check for over-dispersion and zero inflation, which may not always be apparent in standard diagnostic plots.
+
+The '[DHARMa](http://florianhartig.github.io/DHARMa/)' R package offers one solution to these problems.
+It calculates quantile-standardized residuals following this basic algorithm:
+
+1. Fit the GLM to original data set
+2. Simulate from that model (i.e., following the assumptions of the model) many replicate data sets at the observed predictor values for all records
+3. Obtain the empirical cumulative density function of the simulated values for each record -- this represents the assumed distribution that the observed values should follow if the assumptions are met, i.e., the predictive distribution
+4. Obtain the cumulative probability values for each observed value -- these are termed "scaled" or "quantile" residuals.
+
+If the model assumptions are met, these quantile residuals should follow a uniform distribution and should be randomly distributed across model-predicted and covariate values.
+
+The figures below show a broad consistency between our data set and the assumptions of the GLMs we applied, leading us to conclude that we could proceed with inference without concern that we have grossly violated statistical assumptions.
+
+For more details, please see the excellent vignette [here](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html).
+
+```{r par-for-DHARMa-fn}
+par_for_DHARMa = function() {
+  par(mar = c(3,2,2,2), mgp = c(2,0.35,0), tcl = -0.15)
+}
+DHARMa_fig.height = 4
+DHARMa_fig.width = 7
+```
+
+## Question #1: Main RRS {.tabset .tabset-pills}
+
+### **Figure S2a.** Juvenile Progeny
+
+```{r Q1-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q1_juv_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+### **Figure S2b.** Adult Progeny
+
+```{r Q1-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q1_adult_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+## Question #2: Grand-Progeny RRS {.tabset .tabset-pills}
+
+### **Figure S3a.** Juvenile Grand-Progeny
+
+```{r Q2-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q2_juv_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+### **Figure S3b.** Adult Grand-Progeny
+
+```{r Q2-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q2_adult_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+## Question #3: Spawning Pair Type RRS {.tabset .tabset-pills}
+
+### **Figure S4a.** Juvenile Progeny
+
+```{r Q3-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q3_juv_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+### **Figure S4b.** Adult Progeny
+
+```{r Q3-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = make_resids(Q3_adult_fit)
+diag_resids(resids, return_pvals = FALSE)
+```
+
+## Question #4: Adult vs. Juvenile RS
+
+**Figure S5.**
+
+```{r Q4-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
+par_for_DHARMa()
+resids = DHARMa::simulateResiduals(Q4_fit)
+plot(resids)
+```
+
+# Are Parr and Smolt Juveniles Produced at Equal Rates by NOR and HOR Spawners?
+
+This question is important for verifying that calculating reproductive success to the juvenile stage by adding parr (i.e., sampled at screw trap in fall) and smolt (i.e., sampled at screw trap in spring) is appropriate.
+Because overwinter mortality affects smolt numbers but not parr numbers, our inference may be biased if either NOR or HOR spawners have a greater tendency to produce juvenile progeny that preferentially select one or the other life history type.
+As a result, our analyses of reproductive success to the juvenile stage inherently assumes that NOR and HOR produce juvenile progeny that take on each life history strategy with equal rates.
+Note, however, that this assumption is not required in our analyses of reproductive success to the adult stage.
+
+Little information exists to evaluate this assumption directly (e.g., fraction of out-migrants choosing each life history strategy, magnitude of over-winter mortality, etc.).
+So instead, we chose to assess the reliability of this assumption by comparing the proportion of all progeny assigned to the average spawner of either origin that had the parr life history type (using only spawners that had non-zero progeny assigned).
+
+We first applied a standard logistic regression approach. Let $y_i$ represent the number of parr assigned to spawner $i$ that had the parr life history type and $n_i$ represent the total number of juvenile progeny assigned to spawner $i$ (i.e., parr plus smolt progeny). 
+The model took the form:
+
+$$
+\mathrm{logit}(\mu_i) = \mathbf{x}_i^{\top} \boldsymbol{\beta},
+\tag{S1}
+$$
+
+where $\mu_i$ represents the expected proportion of parr among the progeny produced by the average spawner with the same attributes as spawner $i$, $\boldsymbol{x}_i$ is the row vector from the design (i.e., covariate or attribute) matrix corresponding to spawner $i$, and $\boldsymbol{\beta}$ is a vector of coefficients expressing the additive effect of each covariate on $\mathrm{logit}(\mu)$; multiplication of two bold terms (i.e., vectors or matrices) implies matrix multiplication.
+For this analysis, the design matrix was comprised of indicator variables denoting origin, year, and their two-way interaction, that is, the model had the flexibility to produce a unique value of $\mu$ for each origin type each year.
+Logistic regression makes the assumption of binomial outcomes to build the likelihood function:
+
+$$
+y_i \sim \mathrm{Binomial}(\mu_i, n_i).
+\tag{S2}
+$$
+
+We fitted this model using R via the following code: 
+
+```{r, echo = TRUE}
+fit = glmmTMB::glmmTMB(cbind(parr,smolt) ~ origin * year,
+                       data = subset(dat, (parr + smolt) > 0),
+                       family = binomial)
+```
+
+Where the object `dat` is a data frame where each row is an individual spawner with attributes:
+
+* `origin`: `H` = HOR; `W` = NOR
+* `year`: the year of spawning, one of 2008 -- 2016 (treated as a factor)
+* `parr`: the number of juvenile progeny assigned to that spawner with the parr life history strategy
+* `smolt`: the number of juvenile progeny assigned to that spawner with the smolt life history strategy
+
+After filtering for spawners with non-zero juvenile progeny assigned, the data set was comprised of `r nrow(subset(dat, (parr + smolt) > 0))` spawners.
+
+However, we found that this model failed the residual diagnostic tests (more details above):
+
+```{r, fig.width = DHARMa_fig.width, fig.height = DHARMa_fig.height, message = FALSE}
+par_for_DHARMa()
+resids = DHARMa::simulateResiduals(fit)
+plot(resids)
+```
+
+This figure and the failed tests imply that the data were over-dispersed relative to the binomial distribution assumption stated in eq. S2 -- the consequence of this is that the standard error of the $\boldsymbol{\beta}$ vector and resulting $\mu_i$ estimates will be under-estimated and that inference based on null hypothesis tests and confidence interval comparisons will be invalid.
+Rather than attempt to fit the model using more covariates to try to explain this additional variability (as this is intended to be a simplistic test to broadly assess the validity of an assumption), we attempted to account for the extra-binomial variability using beta-binomial regression.
+
+Beta-binomial regression is similar to logistic regression, except that it assumes the spawner-level probabilities of producing parr progeny (previously equal to $\mu_i$, now defined as $p_i$) follow a beta distribution with expectation equal to $\mu_i$ (obtained exactly as shown above in eq. S1) and dispersion parameter equal to $\phi$ (assumed to be common across all spawners), i.e., 
+
+$$
+\begin{align}
+p_i &\sim \mathrm{Beta}(\mu_i\phi, (1 - \mu_i)\phi) \\
+y_i &\sim \mathrm{Binomial}(p_i, n_i)
+\end{align}
+\tag{S3}
+$$
+
+This mixture distribution has the ability to absorb the extra-binomial variability by adjusting the $\phi$ parameter: as $\phi \rightarrow \infty$, the beta-binomial mixture approaches the binomial distribution.
+
+We fitted this model using R via the following code: 
+
+```{r, echo = TRUE}
+fit = glmmTMB::glmmTMB(cbind(parr,smolt) ~ origin * year,
+                       data = subset(dat, (parr + smolt) > 0),
+                       family = glmmTMB::betabinomial
+                       )
+```
+
+Where `dat` and its variables have identical definitions as before.
+
+After applying the same assumption diagnostic procedure, we found that the data satisfied the statistical assumptions of the model:
+
+```{r, fig.width = DHARMa_fig.width, fig.height = DHARMa_fig.height}
+par_for_DHARMa()
+resids = DHARMa::simulateResiduals(fit)
+plot(resids)
+```
+
+So we proceeded to make inference from the beta-binomial version and discarded the results from the binomial-only version.
+The summary of the fitted model can be seen below.
+
+```{details, details.lang = "", details.summary = "Click to View Output Summary"}
+summary(fit)
+```
+
+The figure below shows the year- and origin-specific estimates of $\mu$ with their estimated 95% confidence intervals displayed as error bars:
+
+**Figure S6.**
+
+```{r, fig.width = 6, fig.height = 4.5}
+# build a prediction data set
+newdata = expand.grid(year = unique(dat$year), origin = unique(dat$origin))
+
+# obtain model point estimates with standard errors (logit-scale)
+preds = predict(fit, newdata = newdata, se.fit = TRUE)
+
+# obtain probability scale point estimates and confidence limits
+newdata$pr_parr = plogis(preds$fit)
+newdata$pr_parr_lwr = plogis(preds$fit - 1.96 * preds$se.fit)
+newdata$pr_parr_upr = plogis(preds$fit + 1.96 * preds$se.fit)
+
+# format following the necessary inputs for a side-by-side barplot
+means = as.matrix(reshape2::dcast(newdata, origin ~ year, value.var = "pr_parr")[,-1])
+lwr = as.matrix(reshape2::dcast(newdata, origin ~ year, value.var = "pr_parr_lwr")[,-1])
+upr = as.matrix(reshape2::dcast(newdata, origin ~ year, value.var = "pr_parr_upr")[,-1])
+
+# define colors
+bar_cols = c(H = "grey50", W = "grey85")
+bor_cols = c(H = "grey30", W = "grey60")
+
+# graphics parameters
+par(mar = c(3,3,1,1), mgp = c(2,0.35,0), tcl = -0.15)
+
+# create the barplot
+mp = barplot(means, beside = TRUE, ylim = c(0,1), las = 1,
+             ylab = "Proportion Parr among Assigned Juvenile Progeny",
+             xlab = "Brood Year", col = bar_cols, border = bor_cols)
+
+# add error bars
+segments(mp, lwr, mp, upr, col = bor_cols)
+
+# draw an x-axis
+segments(par("usr")[1], par("usr")[3], par("usr")[2], par("usr")[3])
+axis(side = 1, at = colMeans(mp), labels = FALSE)
+
+# draw a legend
+legend("topright", title = "Origin", legend = c("HOR", "NOR"), pch = 22, col = bor_cols, pt.bg = bar_cols, bty = "n", pt.cex = 2.5)
+
+odds = function(p) {
+  p/(1 - p)
+} 
+```
+
+We see that in `r sum(means[1,] > means[2,])` out of the `r ncol(means)` years HOR spawners had a higher proportion of parr progeny than NOR spawners.
+However, the difference in any given year is not large; the average odds ratio (H:W) across these `r sum(means[1,] > means[2,])` years was `r round(mean((odds(means[1,])/odds(means[2,]))[means[1,] > means[2,]]), 2)`.
+Further, year-specific null hypothesis tests (with Tukey post-hoc adjustment) show that in only one year (2009) the difference was "statistically significant":
+
+```{details, details.lang = '', details.summary = "Click to View Test Results", echo = TRUE, warning = FALSE}
+library(emmeans)
+pairs(emmeans(fit, ~ origin, by = "year", type = "response"))
+```
+
+Based on these findings (a combination of the relatively small magnitude of the differences and rarity of statistical significance), we conclude that the assumption that NOR and HOR spawners produce parr progeny at equal rates is largely valid.
+However, given that our results indicated that NOR spawners have higher juvenile reproductive success than HOR fish, this finding that HOR spawners may tend to produce a higher proportion of parr juveniles than NOR spawners actually suggests that, if anything, our results would be an underestimate of how many times more productive NOR spawners are than HOR spawners to the juvenile stage.
+
+```{r validate-betabinomial, eval = FALSE}
+# this is a verification that the beta binomial regression implemented by glmmTMB
+# is as I understand it to be.
+
+# if the distributions of y_sim and my_y_sim match, then I am correct.
+
+# number of simulation replicates
+n_sim = 50000
+
+# observation number to test this on
+i = 5
+
+# binomial sample size for observation i
+n = rowSums(fit$frame$`cbind(parr, smolt)`)[i]
+
+# generate simulations from model fitted with glmmTMB and extract only those for obs i
+sims = simulate(fit, n_sim)
+y_sim = unlist(lapply(sims, function(x) x[i,1]))
+
+# simulate based on my understanding of beta binomial
+phi = summary(fit)$sigma       # "overdispersion parameter" -- I think it is the sum of beta parameters
+mu = plogis(predict(fit)[i])   # "mean parameter" -- I think it is the mean of the beta distribution
+
+# create a beta binomial RNG based on my understanding
+rbetabinom = function(n, size, mu, phi) {
+  p_use = rbeta(n, mu * phi, (1 - mu) * phi)
+  rbinom(n, size, p_use)
+}
+
+# apply my RNG
+my_y_sim = rbetabinom(n_sim, n, mu, phi)
+
+# obtain PMFs
+my_pmf = table(factor(my_y_sim, levels = 0:n))/n_sim
+their_pmf = table(factor(y_sim, levels = 0:n))/n_sim
+
+# compare PMFs visually
+barplot(rbind(my_pmf, their_pmf), beside = TRUE)
+```
+
+# Sensitivity Analysis: Juvenile RRS with Parr and Smolt Separated
+
+Although the previous analysis (i.e., the beta-binomial regression) illustrated overall validity in our assumption that HOR and NOR spawners were assigned parr and smolt at relatively equal rates, we wished to verify that our inference was not impacted by our summation of parr and smolt into a "total juvenile" reproductive success metric.
+To do this, we disaggregated the "total juvenile" metric into its components, and replicated the analyses for question #1 separately for parr and smolt progeny per spawner.
+
+## Model Selection Results
+
+As shown in Table S2 below, the top model for parr progeny was the same as found for total juvenile progeny as part of our main text analysis for question #1, and included terms for arrival date, spawner size, origin, sex, and year in the conditional model and origin and year in the zero model.
+This makes intuitive sense because parr make up the majority of the total juvenile production (as shown in the beta-binomial analysis above).
+The best smolt-only model also included effects for length, origin, and year in the conditional model and origin and year in the zero model.
+
+These results indicate that our inferences regarding model selection were not largely influenced by our choice to combine parr and smolt progeny into a total juvenile metric of reproductive success.
+
+```{r sen-dirs}
+sen_parr_dir = "01-main-RRS/model-output/parr"
+sen_smolt_dir = "01-main-RRS/model-output/smolt"
+parr_fit = readRDS(file.path(sen_parr_dir, "parr-best-fit.rds"))
+smolt_fit = readRDS(file.path(sen_smolt_dir, "smolt-best-fit.rds"))
+```
+
+```{r}
+parr_aic = read.csv(file.path(sen_parr_dir, "parr-AIC-table.csv")); parr_aic$type = "parr"
+smolt_aic = read.csv(file.path(sen_smolt_dir, "smolt-AIC-table.csv")); smolt_aic$type = "smolt"
+aic = rbind(parr_aic, smolt_aic)
+aic = aic[,c("type", "conditional", "zeroinf", "n_params", "delta_AICc", "weight")]
+```
+
+**Table S2.** _AIC~c~ results for the all hurdle models for parr and smolt progeny that fell within 2 AIC~c~ units of the lowest AIC~c~ model. The best model for each progeny type is shown in bold._
+
+```{r}
+aic_tab = aic
+
+# round values for easy formatting later
+aic_tab$delta_AICc = round(aic_tab$delta_AICc, 2)
+aic_tab$weight = round(aic_tab$weight, 2)
+
+# extract the row numbers of the top model for each progeny type
+best_parr = which(aic_tab$type == "parr" & aic_tab$n_params == min(aic_tab$n_params[aic_tab$type == "parr"]))
+best_smolt = which(aic_tab$type == "smolt" & aic_tab$n_params == min(aic_tab$n_params[aic_tab$type == "smolt"]))
+
+# # make the best model for each progeny type bold
+# aic_tab[best_juv,2] = cell_spec(aic_tab[best_juv,2], "latex", bold = TRUE)
+# aic_tab[best_juv,3] = cell_spec(aic_tab[best_juv,3], "latex", bold = TRUE)
+# aic_tab[best_juv,4] = cell_spec(aic_tab[best_juv,4], "latex", bold = TRUE)
+# aic_tab[best_juv,5] = cell_spec(aic_tab[best_juv,5], "latex", bold = TRUE)
+# aic_tab[best_juv,6] = cell_spec(aic_tab[best_juv,6], "latex", bold = TRUE)
+# aic_tab[best_adult,2] = cell_spec(aic_tab[best_adult,2], "latex", bold = TRUE)
+# aic_tab[best_adult,3] = cell_spec(aic_tab[best_adult,3], "latex", bold = TRUE)
+# aic_tab[best_adult,4] = cell_spec(aic_tab[best_adult,4], "latex", bold = TRUE)
+# aic_tab[best_adult,5] = cell_spec(aic_tab[best_adult,5], "latex", bold = TRUE)
+# aic_tab[best_adult,6] = cell_spec(aic_tab[best_adult,6], "latex", bold = TRUE)
+
+aic_tab$conditional = stringr::str_replace_all(aic_tab$conditional, " ", "")
+aic_tab$conditional = stringr::str_replace_all(aic_tab$conditional, "\\:", "$\\\\times$")
+aic_tab$zeroinf = stringr::str_replace_all(aic_tab$zeroinf, " ", "")
+aic_tab$zeroinf = stringr::str_replace_all(aic_tab$zeroinf, "\\:", "$\\\\times$")
+
+aic_tab[,2:6] %>%
+  kable("html",
+        col.names = c("Conditional", "Zero", "K", "$\\Delta$AIC<sub>c<\\sub>", "Weight"),
+        label = "aic-tab", escape = FALSE) %>%
+  kable_styling(full_width = FALSE, bootstrap_options = c("condensed", "striped")) %>%
+  add_header_above(c("Hurdle Model Component" = 2, "AIC Output" = 3), escape = FALSE) %>%
+  row_spec(0, bold = TRUE) %>%
+  column_spec(1, width = "255px") %>%
+  column_spec(2, width = "175px") %>%
+  group_rows("Parr Progeny", start_row = 1, end_row = max(which(aic_tab[,1] == "parr")), bold = TRUE) %>%
+  row_spec(best_parr, bold = TRUE) %>%
+  row_spec(best_smolt, bold = TRUE) %>%
+  group_rows("Smolt Progeny", start_row = min(which(aic_tab[,1] == "smolt")), end_row = max(which(aic_tab[,1] == "smolt")), bold = TRUE)
+```
+
+## Relative Reproductive Success
+
+```{r}
+print_coef = function(fit, var, inv_link) {
+  out = round(inv_link(confint(fit)[var,]), 2)
+  paste0(out["Estimate"], " (95% CI: ", out["2.5 %"], " -- ", out["97.5 %"], ")")
+}
+```
+
+_The sentences below report the estimated values and confidence intervals for the origin effect (additive on log-scale, multiplicative on natural scale) in the conditional and zero components of the best hurdle models for parr and smolt progeny separately. These estimates are similar in magnitude and uncertainty as those presented in the main text for the combined total juveniles measure._ 
+
+These results suggest that our inferences regarding the magnitude or direction of relative reproductive success to the juvenile stage were not largely affected by our choice to combine parr and smolt progeny for the main analysis.
+
+### Parr Only
+
+The best hurdle model estimated that the average successful NOR spawner produced `r print_coef(parr_fit, "cond.originW", exp)` times as many parr progeny as did the average successful HOR spawner in the average year.
+Further, the average NOR spawner was estimated to be `r print_coef(parr_fit, "zi.originW", exp)` times as likely to be unsuccessful at producing parr progeny than the average HOR spawner.
+
+### Smolt Only
+
+The best hurdle model estimated that the average successful NOR spawner produced `r print_coef(smolt_fit, "cond.originW", exp)` times as many smolt progeny as did the average successful HOR spawner in the average year.
+Further, the average NOR spawner was estimated to be `r print_coef(smolt_fit, "zi.originW", exp)` times as likely to be unsuccessful at producing smolt progeny than the average HOR spawner.
+
+**Figure S7.** _Relative reproductive success to parr (panels a, b, and c) and smolt (panels d, e, and f) stages for the average spawner by sex in each brood year according to three measures produced by the top hurdle models. The ratio is expressed as natural-origin to hatchery-origin such that values greater than one indicate higher success for natural-origin spawners. Error bars represent 95% confidence intervals obtained via parametric bootstrap._
+
+```{r, fig.width = 6, fig.height = 7}
+# load dplyr
+suppressPackageStartupMessages({
+  suppressWarnings({
+    library(dplyr)
+  })
+})
+
+# which progeny types to include
+progeny_types = c("parr", "smolt")
+
+# find the file paths to the fit and bootstrap objects
+fit_files = list.files("01-main-RRS/model-output", pattern = "-best-fit.rds", recursive = TRUE, full.names = TRUE)
+boot_files = list.files("01-main-RRS/model-output", pattern = "-boot-samps.rds", recursive = TRUE, full.names = TRUE)
+
+# keep only those that are in progeny_types
+fit_files = fit_files[stringr::str_detect(fit_files, paste(progeny_types, collapse = "|"))]
+boot_files = boot_files[stringr::str_detect(boot_files, paste(progeny_types, collapse = "|"))]
+
+# read in output from other scripts
+best_fit = lapply(fit_files, function(i) readRDS(i))         # best model per progeny type
+boot_samps = lapply(boot_files, function(i) readRDS(i))      # bootstrap predictions from best model per progeny type
+
+# add a progeny_type variable to bootstrapped output and combine into one dataframe
+boot_samps = lapply(1:length(progeny_types), function(i) {boot_samps[[i]]$progeny_type = progeny_types[i]; boot_samps[[i]]})
+boot_samps = do.call(rbind, boot_samps)
+
+# define plotting objects
+# origin types
+origins = c("H", "W")
+
+# colors for bar plots
+bar_cols = c(H = "grey50", W = "grey85")
+bor_cols = c(H = "grey30", W = "grey60")
+
+# function to calculate RRS
+get_RRS = function(var_type, H_vals, W_vals) {
+  # convert values to odds-scale if var_type == "nzprb"
+  if (var_type == "nzprb") {
+    H_vals = H_vals/(1 - H_vals)
+    W_vals = W_vals/(1 - W_vals)
+  }
+  W_vals/H_vals
+}
+
+# function to make one barplot panel
+rrs_barplot = function(boot_out, progeny_keep, var_keep, legend, label_letter) {
+  
+  # calculate RRS for fitted values from model fitted to original data
+  fitted_vals = boot_out %>%
+    filter(iter == "iter_0" & variable == var_keep & is_mean_day & is_mean_length & progeny_type == progeny_keep) %>%
+    reshape2::dcast(year + sex + iter ~ origin, value.var = "value") %>%
+    mutate(rrs = get_RRS(var_type = var_keep, H_vals = H, W_vals = W))
+  
+  # extract/format the summaries
+  q_vals = boot_out %>%
+    filter(iter != "iter_0", variable == var_keep & is_mean_day & is_mean_length & progeny_type == progeny_keep) %>%
+    reshape2::dcast(year + sex + iter ~ origin, value.var = "value") %>%
+    mutate(rrs = get_RRS(var_type = var_keep, H_vals = H, W_vals = W)) %>%
+    group_by(year, sex) %>%
+    summarize(lwr = quantile(rrs, 0.025), upr = quantile(rrs, 0.975), .groups = "drop")
+  
+  # format RRS summaries for barplotting
+  means = fitted_vals %>%
+    reshape2::dcast(sex ~ year, value.var = "rrs") %>%
+    select(-sex) %>% as.matrix
+  lwrs = q_vals %>%
+    reshape2::dcast(sex ~ year, value.var = "lwr") %>%
+    select(-sex) %>% as.matrix
+  uprs = q_vals %>%
+    reshape2::dcast(sex ~ year, value.var = "upr") %>%
+    select(-sex) %>% as.matrix
+  
+  # shorten the year labels
+  colnames(means) = colnames(lwrs) = colnames(uprs) = paste0("'", substr(colnames(means), 3, 4))
+  
+  # extract the right label text
+  label_text = switch(var_keep,
+                      "resp" = "Progeny per Spawner",
+                      "cond" = "Progeny per Successful Spawner",
+                      "nzprb" = "Odds(Successful Spawner)"
+  )
+  
+  # plot means
+  mp = barplot(means, beside = TRUE, ylim = c(0, max(uprs)) * 1.15, ylab = "", col = bar_cols, border = bor_cols, las = 1)
+  
+  # draw uncertainty estimates
+  segments(mp, lwrs, mp, uprs, col = bor_cols)
+  
+  # draw x-axis
+  usr = par("usr"); xdiff = diff(usr[1:2]); ydiff = diff(usr[3:4])
+  segments(usr[1], usr[3], usr[2], usr[3], xpd = TRUE)
+  axis(side = 1, at = colSums(mp)/2, labels = FALSE)
+  
+  # add a panel label
+  text(usr[1], usr[4] - ydiff * 0.05, paste(label_letter, label_text), pos = 4, cex = 1.2)
+  
+  # draw a reference line at 1
+  abline(h = 1, lty = 2)
+  
+  # add a legend if requested
+  if (legend) {
+    legend("topright", legend = c("Male", "Female"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
+  }
+}
+
+# make the plot: shows both sexes and both progeny types so only one figure needed.
+par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0), mgp = c(2,0.35,0), tcl = -0.15)
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "resp", legend = TRUE, label_letter = "(a)")
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "cond", legend = FALSE, label_letter = "(b)")
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "nzprb", legend = FALSE, label_letter = "(c)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "resp", legend = FALSE, label_letter = "(d)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "cond", legend = FALSE, label_letter = "(e)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "nzprb", legend = FALSE, label_letter = "(f)")
+mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
+mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success")
+mtext(side = 3, "Parr Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
+mtext(side = 3, "Smolt Progeny", outer = TRUE, line = -0.5, adj = 0.85, font = 2)
+
+
+```
+
+
