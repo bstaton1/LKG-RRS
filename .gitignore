@@ -1,0 +1,12 @@
+# Rproj.user hidden folder
+.Rproj.user
+
+# output files
+*.png
+*.pdf
+*.html
+*-AIC-table.csv
+*.rds
+
+# anything in the scratch folder
+scratch/*
