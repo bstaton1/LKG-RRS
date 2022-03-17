@@ -20,7 +20,7 @@ boot_files = rev(list.files(out_dir_parent, pattern = "-boot-samps.rds", recursi
 
 # keep only those that are in progeny_types
 fit_files = fit_files[stringr::str_detect(fit_files, paste(progeny_types, collapse = "|"))]
-boot_files = fit_files[stringr::str_detect(boot_files, paste(progeny_types, collapse = "|"))]
+boot_files = boot_files[stringr::str_detect(boot_files, paste(progeny_types, collapse = "|"))]
 
 # read in output from other scripts
 best_fit = lapply(fit_files, function(i) readRDS(i))         # best model per progeny type
