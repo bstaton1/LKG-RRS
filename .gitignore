@@ -10,3 +10,6 @@
 
 # anything in the scratch folder
 scratch/*
+
+# ignore contents of the data directory for now
+00-data/*
