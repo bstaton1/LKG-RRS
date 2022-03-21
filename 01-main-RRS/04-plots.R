@@ -103,19 +103,19 @@ fitted_barplot = function(boot_out, progeny_keep, var_keep, sex_keep, legend, la
   
   # add a legend if requested
   if (legend) {
-    legend("topright", title = "Origin", legend = c("Hatchery", "Natural"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
+    legend("topright", inset = c(0, 0.1), title = "Origin", legend = c("HOR", "NOR"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
   }
 }
 
 # FEMALES: apply plotting function to make a multipanel plot
 png(file.path(fig_dir, "fitted-categories-female.png"), width = 6 * ppi, height = 7 * ppi, res = ppi)
 par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0), mgp = c(2,0.35,0), tcl = -0.15)
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", sex_keep = "F", legend = FALSE, label_letter = "(a)")
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", sex_keep = "F", legend = FALSE, label_letter = "(b)")
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", sex_keep = "F", legend = FALSE, label_letter = "(c)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", sex_keep = "F", legend = TRUE, label_letter = "(d)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", sex_keep = "F", legend = FALSE, label_letter = "(e)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", sex_keep = "F", legend = FALSE, label_letter = "(f)")
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", sex_keep = "F", legend = TRUE, label_letter = "(a)")
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", sex_keep = "F", legend = FALSE, label_letter = "(b)")
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", sex_keep = "F", legend = FALSE, label_letter = "(c)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", sex_keep = "F", legend = FALSE, label_letter = "(d)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", sex_keep = "F", legend = FALSE, label_letter = "(e)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", sex_keep = "F", legend = FALSE, label_letter = "(f)")
 mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
 mtext(side = 2, outer = TRUE, line = 0.5, "Measure of Female Reproductive Success")
 mtext(side = 3, "Juvenile Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
@@ -124,13 +124,13 @@ dev.off()
 
 # MALES: apply plotting function to make a multipanel plot
 png(file.path(fig_dir, "fitted-categories-male.png"), width = 6 * ppi, height = 7 * ppi, res = ppi)
-par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0))
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", sex_keep = "M", legend = FALSE, label_letter = "(a)")
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", sex_keep = "M", legend = FALSE, label_letter = "(b)")
-fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", sex_keep = "M", legend = FALSE, label_letter = "(c)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", sex_keep = "M", legend = TRUE, label_letter = "(d)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", sex_keep = "M", legend = FALSE, label_letter = "(e)")
-fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", sex_keep = "M", legend = FALSE, label_letter = "(f)")
+par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0), mgp = c(2,0.35,0), tcl = -0.15)
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", sex_keep = "M", legend = TRUE, label_letter = "(a)")
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", sex_keep = "M", legend = FALSE, label_letter = "(b)")
+fitted_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", sex_keep = "M", legend = FALSE, label_letter = "(c)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", sex_keep = "M", legend = FALSE, label_letter = "(d)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", sex_keep = "M", legend = FALSE, label_letter = "(e)")
+fitted_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", sex_keep = "M", legend = FALSE, label_letter = "(f)")
 mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
 mtext(side = 2, outer = TRUE, line = 0.5, "Measure of Male Reproductive Success")
 mtext(side = 3, "Juvenile Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
@@ -378,19 +378,19 @@ rrs_barplot = function(boot_out, progeny_keep, var_keep, legend, label_letter) {
   
   # add a legend if requested
   if (legend) {
-    legend("topright", legend = c("Male", "Female"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
+    legend("topright", inset = c(0, 0.1), legend = c("Male", "Female"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
   }
 }
 
 # make the plot: shows both sexes and both progeny types so only one figure needed.
 png(file.path(fig_dir, "RRS.png"), width = 6 * ppi, height = 7 * ppi, res = ppi)
 par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0), mgp = c(2,0.35,0), tcl = -0.15)
-rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", legend = TRUE, label_letter = "(a)")
-rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", legend = FALSE, label_letter = "(b)")
-rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", legend = FALSE, label_letter = "(c)")
-rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", legend = FALSE, label_letter = "(d)")
-rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", legend = FALSE, label_letter = "(e)")
-rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", legend = FALSE, label_letter = "(f)")
+rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "cond", legend = TRUE, label_letter = "(a)")
+rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "nzprb", legend = FALSE, label_letter = "(b)")
+rrs_barplot(boot_samps, progeny_keep = "total_juv", var_keep = "resp", legend = FALSE, label_letter = "(c)")
+rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", legend = FALSE, label_letter = "(d)")
+rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", legend = FALSE, label_letter = "(e)")
+rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", legend = FALSE, label_letter = "(f)")
 mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
 mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success")
 mtext(side = 3, "Juvenile Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
