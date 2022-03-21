@@ -4,7 +4,10 @@ subtitle: "_Improved productivity of naturalized spring Chinook salmon following
 author: "H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower"
 output: 
   bookdown::html_document2:
-    number_sections: FALSE
+    number_sections: TRUE
+    toc: TRUE
+    toc_depth: 1
+    toc_float: TRUE
 params:
   do_DHARMa: 
     value: TRUE
