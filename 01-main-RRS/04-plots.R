@@ -392,7 +392,7 @@ rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "cond", legend = FALS
 rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "nzprb", legend = FALSE, label_letter = "(e)")
 rrs_barplot(boot_samps, progeny_keep = "adult", var_keep = "resp", legend = FALSE, label_letter = "(f)")
 mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
-mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success")
+mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success (NOR:HOR)")
 mtext(side = 3, "Juvenile Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
 mtext(side = 3, "Adult Progeny", outer = TRUE, line = -0.5, adj = 0.85, font = 2)
 dev.off()
