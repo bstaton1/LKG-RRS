@@ -266,6 +266,64 @@ x = sapply(2008:2012, function(y) hist_fn(y, "adult_grand", 1, ifelse(y == 2008,
 mtext(side = 1, outer = TRUE, line = 0.75, "Number of Adult Grand-Progeny Assigned")
 mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
 ```
+
+# Additional Hurdle Model Output {.tabset .tabset-pills}
+
+The top model for juvenile progeny included effects for sex, length, arrival date, origin, and year in the conditional model.
+The figures in this section show patterns quantified by the hurdle model that we did not believe there was space to show in the main text.
+
+## **Figure S2** (Categorical) {- .tabset .tabset-pills}
+
+These figures display the expected reproductive success by hurdle model output type, calculated at the average value of the length and arrival date values for each year, sex, and origin.
+
+### **(a)** Females {-}
+
+_This figure is included in the main text (Figure X therein), but is included here for ease of comparison to males._
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/fitted-categories-female.png"))
+```
+
+### **(b)** Males {-}
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/fitted-categories-male.png"))
+```
+
+## **Figure S3** (Continuous -- Length) {- .tabset .tabset-pills}
+
+The figures below show the expected number of progeny per spawner (successful and unsuccessful spawners combined) as a function of spawner length.
+The x-axis range that each curve takes on reflects the range of the specific sex/origin combination took on that year.
+
+### **(a)** Females {-}
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-continuous-length-females.png"))
+```
+
+### **(b)** Males {-}
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-continuous-length-males.png"))
+```
+
+## **Figure S4** (Continuous -- Arrival Date) {- .tabset .tabset-pills}
+
+The figures below show the expected number of progeny per spawner (successful and unsuccessful spawners combined) as a function of arrival date.
+The x-axis range that each curve takes on reflects the range of the specific sex/origin combination took on that year.
+
+### **(a)** Females {-}
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-continuous-day-females.png"))
+```
+
+### **(b)** Males {-}
+
+```{r}
+include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-continuous-day-males.png"))
+```
+
 # GLM Residual Diagnostics {.tabset .tabset-dropdown}
 
 We fitted many generalized linear models for our analysis and we based our inferences of statistical importance primarily on (a) AIC~c~ model selection and (b) confidence intervals of ratios derived from model-predicted reproductive success values.
