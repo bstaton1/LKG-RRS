@@ -74,6 +74,13 @@ The **All Years** row shows the values obtained by aggregating all years.
 
 ```{r summary_table-fn}
 summary_table = function(progeny_keep) {
+  
+  if (stringr::str_detect(progeny_keep, "grand")) {
+    dat = subset(dat, year %in% c(2008:2012))
+    dat = droplevels(dat)
+    dat = na.omit(dat)
+  }
+  
   n = tapply(dat[,progeny_keep], list(dat$year, dat$origin), length); colnames(n) = paste0(colnames(n), "_n")
   p0 = tapply(dat[,progeny_keep], list(dat$year, dat$origin), function(x) paste0(round(mean(x == 0), 3) * 100, "%")); colnames(p0) = paste0(colnames(p0), "_p0")
   mn0 = tapply(dat[,progeny_keep], list(dat$year, dat$origin), function(x) round(mean(x[x > 0]), 2)); colnames(mn0) = paste0(colnames(mn0), "_mn0")
@@ -95,19 +102,43 @@ summary_table = function(progeny_keep) {
 }
 ```
 
-## **Table S1a.** Juvenile Progeny
+## **Table S1a.** Total Juvenile Progeny {-}
 
 ```{r tot_juv_summary_table}
 summary_table("total_juv")
 ```
 
-## **Table S1b.** Adult Progeny
+## **Table S1b.** Parr Juvenile Progeny {-}
+
+```{r parr_summary_table}
+summary_table("parr")
+```
+
+## **Table S1c.** Smolt Juvenile Progeny {-}
+
+```{r smolt_summary_table}
+summary_table("smolt")
+```
+
+## **Table S1d.** Adult Progeny {-}
 
 ```{r adult_summary_table}
 summary_table("adult")
 ```
 
 # Progeny Per Spawner Histograms {.tabset .tabset-pills}
+## **Table S1e.** Total Juvenile Grand-Progeny {-}
+
+```{r total_juv_grand_summary_table}
+summary_table("total_juv_grand")
+```
+
+## **Table S1f.** Adult Grand-Progeny {-}
+
+```{r adult_grand_summary_table}
+summary_table("adult_grand")
+```
+
 
 ```{r hist-fn}
 hist_fn = function(year_keep, progeny_type, axis_by) {
