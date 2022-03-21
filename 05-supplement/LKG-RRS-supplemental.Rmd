@@ -356,9 +356,9 @@ DHARMa_fig.height = 4
 DHARMa_fig.width = 7
 ```
 
-## Question #1: Main RRS {.tabset .tabset-pills}
+## Question #1: Main RRS {- .tabset .tabset-pills}
 
-### **Figure S2a.** Juvenile Progeny
+### **Figure S5a.** Juvenile Progeny {-}
 
 ```{r Q1-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -366,7 +366,7 @@ resids = make_resids(Q1_juv_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-### **Figure S2b.** Adult Progeny
+### **Figure S5b.** Adult Progeny {-}
 
 ```{r Q1-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -374,9 +374,9 @@ resids = make_resids(Q1_adult_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-## Question #2: Grand-Progeny RRS {.tabset .tabset-pills}
+## Question #2: Grand-Progeny RRS {- .tabset .tabset-pills}
 
-### **Figure S3a.** Juvenile Grand-Progeny
+### **Figure S6a.** Juvenile Grand-Progeny {-}
 
 ```{r Q2-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -384,7 +384,7 @@ resids = make_resids(Q2_juv_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-### **Figure S3b.** Adult Grand-Progeny
+### **Figure S6b.** Adult Grand-Progeny {-}
 
 ```{r Q2-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -392,9 +392,9 @@ resids = make_resids(Q2_adult_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-## Question #3: Spawning Pair Type RRS {.tabset .tabset-pills}
+## Question #3: Spawning Pair Type RRS {- .tabset .tabset-pills}
 
-### **Figure S4a.** Juvenile Progeny
+### **Figure S7a.** Juvenile Progeny {-}
 
 ```{r Q3-juv-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -402,7 +402,7 @@ resids = make_resids(Q3_juv_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-### **Figure S4b.** Adult Progeny
+### **Figure S7b.** Adult Progeny {-}
 
 ```{r Q3-adult-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
@@ -410,9 +410,9 @@ resids = make_resids(Q3_adult_fit)
 diag_resids(resids, return_pvals = FALSE)
 ```
 
-## Question #4: Adult vs. Juvenile RS
+## Question #4: Adult vs. Juvenile RS {-}
 
-**Figure S5.**
+**Figure S8.**
 
 ```{r Q4-resids, fig.height = DHARMa_fig.height, fig.width = DHARMa_fig.width, eval = params$do_DHARMa}
 par_for_DHARMa()
