@@ -618,9 +618,9 @@ barplot(rbind(my_pmf, their_pmf), beside = TRUE)
 # Sensitivity Analysis: Juvenile RRS with Parr and Smolt Separated
 
 Although the previous analysis (i.e., the beta-binomial regression) illustrated overall validity in our assumption that HOR and NOR spawners were assigned parr and smolt at relatively equal rates, we wished to verify that our inference was not impacted by our summation of parr and smolt into a "total juvenile" reproductive success metric.
-To do this, we disaggregated the "total juvenile" metric into its components, and replicated the analyses for question #1 separately for parr and smolt progeny per spawner.
+To do this, we disaggregated the "total juvenile" metric into its components, and replicated the analyses for question #1 (i.e., fit hurdle models with covariates for sex, origin, arrival date, length, year, and interactions; AIC~c~ model selection; bootstrap RRS ratios from best model; determine how frequently CIs of RRS ratio overlap 1) separately for parr and smolt progeny per spawner.
 
-## Model Selection Results
+## Model Selection Results {-}
 
 As shown in Table S2 below, the top model for parr progeny was the same as found for total juvenile progeny as part of our main text analysis for question #1, and included terms for arrival date, spawner size, origin, sex, and year in the conditional model and origin and year in the zero model.
 This makes intuitive sense because parr make up the majority of the total juvenile production (as shown in the beta-binomial analysis above).
@@ -633,6 +633,9 @@ sen_parr_dir = "01-main-RRS/model-output/parr"
 sen_smolt_dir = "01-main-RRS/model-output/smolt"
 parr_fit = readRDS(file.path(sen_parr_dir, "parr-best-fit.rds"))
 smolt_fit = readRDS(file.path(sen_smolt_dir, "smolt-best-fit.rds"))
+parr_boot = readRDS(file.path(sen_parr_dir, "parr-boot-samps.rds")); parr_boot$type = "parr"
+smolt_boot = readRDS(file.path(sen_smolt_dir, "smolt-boot-samps.rds")); smolt_boot$type = "smolt"
+boot = rbind(parr_boot, smolt_boot)
 ```
 
 ```{r}
@@ -640,13 +643,12 @@ parr_aic = read.csv(file.path(sen_parr_dir, "parr-AIC-table.csv")); parr_aic$typ
 smolt_aic = read.csv(file.path(sen_smolt_dir, "smolt-AIC-table.csv")); smolt_aic$type = "smolt"
 aic = rbind(parr_aic, smolt_aic)
 aic = aic[,c("type", "conditional", "zeroinf", "n_params", "delta_AICc", "weight")]
+aic_tab = aic
 ```
 
 **Table S2.** _AIC~c~ results for the all hurdle models for parr and smolt progeny that fell within 2 AIC~c~ units of the lowest AIC~c~ model. The best model for each progeny type is shown in bold._
 
 ```{r}
-aic_tab = aic
-
 # round values for easy formatting later
 aic_tab$delta_AICc = round(aic_tab$delta_AICc, 2)
 aic_tab$weight = round(aic_tab$weight, 2)
@@ -654,18 +656,6 @@ aic_tab$weight = round(aic_tab$weight, 2)
 # extract the row numbers of the top model for each progeny type
 best_parr = which(aic_tab$type == "parr" & aic_tab$n_params == min(aic_tab$n_params[aic_tab$type == "parr"]))
 best_smolt = which(aic_tab$type == "smolt" & aic_tab$n_params == min(aic_tab$n_params[aic_tab$type == "smolt"]))
-
-# # make the best model for each progeny type bold
-# aic_tab[best_juv,2] = cell_spec(aic_tab[best_juv,2], "latex", bold = TRUE)
-# aic_tab[best_juv,3] = cell_spec(aic_tab[best_juv,3], "latex", bold = TRUE)
-# aic_tab[best_juv,4] = cell_spec(aic_tab[best_juv,4], "latex", bold = TRUE)
-# aic_tab[best_juv,5] = cell_spec(aic_tab[best_juv,5], "latex", bold = TRUE)
-# aic_tab[best_juv,6] = cell_spec(aic_tab[best_juv,6], "latex", bold = TRUE)
-# aic_tab[best_adult,2] = cell_spec(aic_tab[best_adult,2], "latex", bold = TRUE)
-# aic_tab[best_adult,3] = cell_spec(aic_tab[best_adult,3], "latex", bold = TRUE)
-# aic_tab[best_adult,4] = cell_spec(aic_tab[best_adult,4], "latex", bold = TRUE)
-# aic_tab[best_adult,5] = cell_spec(aic_tab[best_adult,5], "latex", bold = TRUE)
-# aic_tab[best_adult,6] = cell_spec(aic_tab[best_adult,6], "latex", bold = TRUE)
 
 aic_tab$conditional = stringr::str_replace_all(aic_tab$conditional, " ", "")
 aic_tab$conditional = stringr::str_replace_all(aic_tab$conditional, "\\:", "$\\\\times$")
@@ -687,12 +677,28 @@ aic_tab[,2:6] %>%
   group_rows("Smolt Progeny", start_row = min(which(aic_tab[,1] == "smolt")), end_row = max(which(aic_tab[,1] == "smolt")), bold = TRUE)
 ```
 
-## Relative Reproductive Success
+## Relative Reproductive Success {-}
 
 ```{r}
 print_coef = function(fit, var, inv_link) {
   out = round(inv_link(confint(fit)[var,]), 2)
   paste0(out["Estimate"], " (95% CI: ", out["2.5 %"], " -- ", out["97.5 %"], ")")
+}
+
+print_odds_ratio_nzprb = function(boot, type_keep) {
+  
+  # year and sex don't matter because there were no year interactions by origin with these factors
+  x = subset(boot, year == 2008 & sex == "F" & type == type_keep & is_mean_day & is_mean_length & variable == "nzprb")
+  x = x[,c("origin","iter", "value")]
+  x = reshape2::dcast(x, iter ~ origin, value.var = "value")
+  odds = function(p) p/(1 - p)
+  x$ratio = odds(x$W)/odds(x$H)
+  
+  mn = round(x$ratio[x$iter == "iter_0"], 2)
+  lwr = round(quantile(x$ratio[x$iter != "iter_0"], 0.025), 2)
+  upr = round(quantile(x$ratio[x$iter != "iter_0"], 0.975), 2)
+  
+  paste0(mn, " (95% CI: ", lwr, " -- ", upr, ")")
 }
 ```
 
@@ -700,17 +706,17 @@ _The sentences below report the estimated values and confidence intervals for th
 
 These results suggest that our inferences regarding the magnitude or direction of relative reproductive success to the juvenile stage were not largely affected by our choice to combine parr and smolt progeny for the main analysis.
 
-### Parr Only
+### Parr Only {-}
 
 The best hurdle model estimated that the average successful NOR spawner produced `r print_coef(parr_fit, "cond.originW", exp)` times as many parr progeny as did the average successful HOR spawner in the average year.
-Further, the average NOR spawner was estimated to be `r print_coef(parr_fit, "zi.originW", exp)` times as likely to be unsuccessful at producing parr progeny than the average HOR spawner.
+Further, the average NOR spawner was estimated to be `r print_odds_ratio_nzprb(boot, "parr")` times as likely to be successful at producing parr progeny than the average HOR spawner.
 
-### Smolt Only
+### Smolt Only {-}
 
 The best hurdle model estimated that the average successful NOR spawner produced `r print_coef(smolt_fit, "cond.originW", exp)` times as many smolt progeny as did the average successful HOR spawner in the average year.
-Further, the average NOR spawner was estimated to be `r print_coef(smolt_fit, "zi.originW", exp)` times as likely to be unsuccessful at producing smolt progeny than the average HOR spawner.
+Further, the average NOR spawner was estimated to be `r print_odds_ratio_nzprb(boot, "smolt")` times as likely to be successful at producing smolt progeny than the average HOR spawner.
 
-**Figure S7.** _Relative reproductive success to parr (panels a, b, and c) and smolt (panels d, e, and f) stages for the average spawner by sex in each brood year according to three measures produced by the top hurdle models. The ratio is expressed as natural-origin to hatchery-origin such that values greater than one indicate higher success for natural-origin spawners. Error bars represent 95% confidence intervals obtained via parametric bootstrap._
+**Figure S10.** _Relative reproductive success to parr (panels a, b, and c) and smolt (panels d, e, and f) stages for the average spawner by sex in each brood year according to three measures produced by the top hurdle models. The ratio is expressed as natural-origin to hatchery-origin such that values greater than one indicate higher success for natural-origin spawners. Error bars represent 95% confidence intervals obtained via parametric bootstrap._
 
 ```{r, fig.width = 6, fig.height = 7}
 # load dplyr
@@ -814,23 +820,22 @@ rrs_barplot = function(boot_out, progeny_keep, var_keep, legend, label_letter) {
   
   # add a legend if requested
   if (legend) {
-    legend("topright", legend = c("Male", "Female"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
+    legend("topright", inset = c(0, 0.1), legend = c("Male", "Female"), pt.cex = 2, pch = 22, pt.bg = bar_cols, col = bor_cols, bty = "n")
   }
 }
 
 # make the plot: shows both sexes and both progeny types so only one figure needed.
 par(mfcol = c(3,2), mar = c(1,2,1,1), oma = c(2,2,1,0), mgp = c(2,0.35,0), tcl = -0.15)
-rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "resp", legend = TRUE, label_letter = "(a)")
-rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "cond", legend = FALSE, label_letter = "(b)")
-rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "nzprb", legend = FALSE, label_letter = "(c)")
-rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "resp", legend = FALSE, label_letter = "(d)")
-rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "cond", legend = FALSE, label_letter = "(e)")
-rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "nzprb", legend = FALSE, label_letter = "(f)")
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "cond", legend = TRUE, label_letter = "(a)")
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "nzprb", legend = FALSE, label_letter = "(b)")
+rrs_barplot(boot_samps, progeny_keep = "parr", var_keep = "resp", legend = FALSE, label_letter = "(c)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "cond", legend = FALSE, label_letter = "(d)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "nzprb", legend = FALSE, label_letter = "(e)")
+rrs_barplot(boot_samps, progeny_keep = "smolt", var_keep = "resp", legend = FALSE, label_letter = "(f)")
 mtext(side = 1, outer = TRUE, line = 1, "Brood Year")
-mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success")
+mtext(side = 2, outer = TRUE, line = 0.5, "Relative Reproductive Success (NOR:HOR)")
 mtext(side = 3, "Parr Progeny", outer = TRUE, line = -0.5, adj = 0.2, font = 2)
 mtext(side = 3, "Smolt Progeny", outer = TRUE, line = -0.5, adj = 0.85, font = 2)
-
 
 ```
 
