@@ -420,7 +420,9 @@ resids = DHARMa::simulateResiduals(Q4_fit)
 plot(resids)
 ```
 
-# Are Parr and Smolt Juveniles Produced at Equal Rates by NOR and HOR Spawners?
+# HOR vs. NOR Rates of Juvenile vs. Parr Assignment
+
+**Question**: _Are HOR and NOR spawners equally likely to be assigned parr juvenile progeny as opposed to smolt juvenile progeny?_
 
 This question is important for verifying that calculating reproductive success to the juvenile stage by adding parr (i.e., sampled at screw trap in fall) and smolt (i.e., sampled at screw trap in spring) is appropriate.
 Because overwinter mortality affects smolt numbers but not parr numbers, our inference may be biased if either NOR or HOR spawners have a greater tendency to produce juvenile progeny that preferentially select one or the other life history type.
@@ -515,7 +517,7 @@ summary(fit)
 
 The figure below shows the year- and origin-specific estimates of $\mu$ with their estimated 95% confidence intervals displayed as error bars:
 
-**Figure S6.**
+**Figure S9.**
 
 ```{r, fig.width = 6, fig.height = 4.5}
 # build a prediction data set
@@ -571,11 +573,10 @@ pairs(emmeans(fit, ~ origin, by = "year", type = "response"))
 ```
 
 Based on these findings (a combination of the relatively small magnitude of the differences and rarity of statistical significance), we conclude that the assumption that NOR and HOR spawners produce parr progeny at equal rates is largely valid.
-However, given that our results indicated that NOR spawners have higher juvenile reproductive success than HOR fish, this finding that HOR spawners may tend to produce a higher proportion of parr juveniles than NOR spawners actually suggests that, if anything, our results would be an underestimate of how many times more productive NOR spawners are than HOR spawners to the juvenile stage.
 
 ```{r validate-betabinomial, eval = FALSE}
 # this is a verification that the beta binomial regression implemented by glmmTMB
-# is as I understand it to be.
+# is as I (Staton) understand it to be.
 
 # if the distributions of y_sim and my_y_sim match, then I am correct.
 
@@ -609,7 +610,8 @@ my_y_sim = rbetabinom(n_sim, n, mu, phi)
 my_pmf = table(factor(my_y_sim, levels = 0:n))/n_sim
 their_pmf = table(factor(y_sim, levels = 0:n))/n_sim
 
-# compare PMFs visually
+# compare PMFs visually: the PMFs are near identical, ran multiple times and got very similar results
+# conclusion: my description of the beta-binomial above is correct
 barplot(rbind(my_pmf, their_pmf), beside = TRUE)
 ```
 
