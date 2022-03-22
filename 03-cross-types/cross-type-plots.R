@@ -15,7 +15,6 @@ boot_out = do.call(rbind, lapply(in_files, readRDS))
 
 ratio_cols = stringr::str_which(colnames(boot_out), "\\:")
 ratios_only = boot_out[,c("progeny_type", "year", "iter", colnames(boot_out)[ratio_cols])]
-range(ratios_only[,4:6], na.rm = TRUE)
 
 # convert to long format
 ratios = reshape2::melt(ratios_only, id.vars = c("year", "progeny_type", "iter"), value.name = "rrs", variable.name = "type")

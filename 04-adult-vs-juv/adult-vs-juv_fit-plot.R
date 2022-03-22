@@ -1,5 +1,5 @@
 
-# load the data set: the same as in analyis-01
+# load the data set: the same as in 01-main-RRS
 # the "y_variable" object isn't relevant for this 
 # analysis but is still needed to run that script
 y_variable = "total_juv"

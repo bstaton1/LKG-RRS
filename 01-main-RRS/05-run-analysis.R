@@ -9,7 +9,6 @@ source("common-functions.R")
 
 # read command line arguments
 args = commandArgs(trailingOnly = TRUE)
-# args = c("adult", "10", "TRUE")
 y_variable = args[1]
 ncpus = as.numeric(args[2])
 make_figures = as.logical(args[3])

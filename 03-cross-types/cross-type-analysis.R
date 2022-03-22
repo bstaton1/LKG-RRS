@@ -15,9 +15,6 @@ ref = "HxH"
 out_dir = "03-cross-types/model-output"
 if (!dir.exists(out_dir)) dir.create(out_dir)
 
-# set resolution for png figures
-ppi = 600
-
 # read in the data
 in_file = file.path("00-data", paste0(progeny_type, "_Offs_per_Cross.csv"))
 dat = read.csv(in_file)
@@ -27,13 +24,6 @@ dat = dat[,c("Parental_SampleYear", "Parental_CrossType", "No.Offspring")]
 colnames(dat) = c("year", "cross_type", "progeny")
 dat$year = as.factor(dat$year)
 dat$cross_type = factor(dat$cross_type, levels = c("NxN", "HxN", "NxH", "HxH"))
-
-# calculate mean progeny by cross type and year
-data_means = round(with(dat, tapply(progeny, list(cross_type, year), mean, na.rm = TRUE)), 2)
-
-# calculate mean progeny ratios by cross type and year
-data_mean_ratios = t(apply(data_means, 1, function(x) x/data_means[ref,]))
-data_mean_ratios = data_mean_ratios[-which(rownames(data_mean_ratios) == ref),]
 
 # select the appropriate family for fitting GLM
 # both data sets have no zeros. untruncated versions had poor QQ-plot of standardized residuals
@@ -52,10 +42,6 @@ cat("\nAIC Table:\n\n")
 AICtab = AIC(fit0, fit1, fit2, fit3); AICtab
 best_mod = rownames(AICtab)[which.min(AICtab[,"AIC"])]
 best_mod = eval(parse(text = best_mod))
-
-# perform residual diagnostics on the best model
-resids = DHARMa::simulateResiduals(best_mod)
-plot(resids)
 
 # function to create a prediction data set: all year and cross type combos
 make_pred_data = function(fit) expand.grid(year = unique(fit$frame$year), cross_type = unique(fit$frame$cross_type))
