@@ -145,13 +145,13 @@ day_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, ylim) 
   
   # get predicted curve from model fitted to original data: iter_0
   fitted_vals = boot_out %>%
-    filter(iter == "iter_0" & variable == "resp" & is_mean_length & !is_mean_day & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
+    filter(iter == "iter_0" & variable == "cond" & is_mean_length & !is_mean_day & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
     select(origin, day, day_raw, value)
   colnames(fitted_vals)[4] = "mean"
   
   # summarize bootstraped predicted curves into a 95% confidence interval
   q_vals = boot_out %>%
-    filter(iter != "iter_0" & variable == "resp" & is_mean_length & !is_mean_day & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
+    filter(iter != "iter_0" & variable == "cond" & is_mean_length & !is_mean_day & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
     group_by(origin, day) %>%
     summarize(lwr = quantile(value, 0.025), upr = quantile(value, 0.975), .groups = "drop")
   
@@ -178,7 +178,7 @@ day_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, ylim) 
   
   # draw the legend if requested
   if (legend) {
-    legend("topleft", title = "Origin", legend = c("Hatchery", "Natural"),
+    legend("topleft", title = "Origin", legend = c("HOR", "NOR"),
            pch = 22, pt.cex = 2.5, pt.bg = fill_cols, col = line_cols_trans,
            bty = "n")
   }
@@ -199,17 +199,17 @@ day_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, ylim) 
 # FEMALES; TOTAL JUVENILES
 png(file.path(fig_dir, "total_juv-fitted-continuous-day-females.png"), width = 7.5 * ppi, height = 6 * ppi, res = ppi)
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
-for (y in unique(dat$year)) day_panel(boot_samps, "total_juv", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 12))
+for (y in unique(dat$year)) day_panel(boot_samps, "total_juv", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 25))
 mtext(side = 1, outer = TRUE, line = 1.75, "Arrival Date")
-mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny per Successful Female")
 dev.off()
 
 # MALES; TOTAL JUVENILES
 png(file.path(fig_dir, "total_juv-fitted-continuous-day-males.png"), width = 7.5 * ppi, height = 6 * ppi, res = ppi)
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
-for (y in unique(dat$year)) day_panel(boot_samps, "total_juv", y, "M", ifelse(y == 2008, TRUE, FALSE), c(0, 12))
+for (y in unique(dat$year)) day_panel(boot_samps, "total_juv", y, "M", ifelse(y == 2008, TRUE, FALSE), c(0, 25))
 mtext(side = 1, outer = TRUE, line = 1.75, "Arrival Date")
-mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny per Successful Male")
 dev.off()
 
 # FEMALES; ADULTS
@@ -217,7 +217,7 @@ png(file.path(fig_dir, "adult-fitted-continuous-day-females.png"), width = 7.5 *
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
 for (y in unique(dat$year)) day_panel(boot_samps, "adult", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 2))
 mtext(side = 1, outer = TRUE, line = 1.75, "Arrival Date")
-mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny per Successful Female")
 dev.off()
 
 # MALES; ADULTS
@@ -225,7 +225,7 @@ png(file.path(fig_dir, "adult-fitted-continuous-day-males.png"), width = 7.5 * p
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
 for (y in unique(dat$year)) day_panel(boot_samps, "adult", y, "M", ifelse(y == 2008, TRUE, FALSE), c(0, 2))
 mtext(side = 1, outer = TRUE, line = 1.75, "Arrival Date")
-mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny per Successful Male")
 dev.off()
 
 ##### MODEL-PREDICTED REPRODUCTIVE SUCCESS MEASURES: LENGTH RELATIONSHIPS #####
@@ -236,13 +236,13 @@ length_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, yli
   
   # get predicted curve from model fitted to original data: iter_0
   fitted_vals = boot_out %>%
-    filter(iter == "iter_0" & variable == "resp" & is_mean_day & !is_mean_length & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
+    filter(iter == "iter_0" & variable == "cond" & is_mean_day & !is_mean_length & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
     select(origin, length, length_raw, value)
   colnames(fitted_vals)[4] = "mean"
   
   # summarize bootstraped predicted curves into a 95% confidence interval
   q_vals = boot_out %>%
-    filter(iter != "iter_0" & variable == "resp" & is_mean_day & !is_mean_length & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
+    filter(iter != "iter_0" & variable == "cond" & is_mean_day & !is_mean_length & progeny_type == progeny_keep & sex == sex_keep & year == year_keep) %>%
     group_by(origin, length) %>%
     summarize(lwr = quantile(value, 0.025), upr = quantile(value, 0.975), .groups = "drop")
   
@@ -269,7 +269,7 @@ length_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, yli
   
   # draw the legend if requested
   if (legend) {
-    legend("topleft", title = "Origin", legend = c("Hatchery", "Natural"),
+    legend("topleft", title = "Origin", legend = c("HOR", "NOR"),
            pch = 22, pt.cex = 2.5, pt.bg = fill_cols, col = line_cols_trans,
            bty = "n")
   }
@@ -280,9 +280,9 @@ length_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, yli
 # FEMALES; TOTAL JUVENILES
 png(file.path(fig_dir, "total_juv-fitted-continuous-length-females.png"), width = 7.5 * ppi, height = 6 * ppi, res = ppi)
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
-for (y in unique(dat$year)) length_panel(boot_samps, "total_juv", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 15))
+for (y in unique(dat$year)) length_panel(boot_samps, "total_juv", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 25))
 mtext(side = 1, outer = TRUE, line = 1.75, "Length (mm)")
-mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny per Successful Female")
 dev.off()
 
 # MALES; TOTAL JUVENILES
@@ -290,7 +290,7 @@ png(file.path(fig_dir, "total_juv-fitted-continuous-length-males.png"), width = 
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
 for (y in unique(dat$year)) length_panel(boot_samps, "total_juv", y, "M", ifelse(y == 2008, TRUE, FALSE), c(0, 25))
 mtext(side = 1, outer = TRUE, line = 1.75, "Length (mm)")
-mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Juvenile Progeny per Successful Male")
 dev.off()
 
 # FEMALES; ADULTS
@@ -298,7 +298,7 @@ png(file.path(fig_dir, "adult-fitted-continuous-length-females.png"), width = 7.
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
 for (y in unique(dat$year)) length_panel(boot_samps, "adult", y, "F", ifelse(y == 2008, TRUE, FALSE), c(0, 2))
 mtext(side = 1, outer = TRUE, line = 1.75, "Length (mm)")
-mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny per Successful Female")
 dev.off()
 
 # MALES; ADULTS
@@ -306,7 +306,7 @@ png(file.path(fig_dir, "adult-fitted-continuous-length-males.png"), width = 7.5 
 par(mfrow = c(3,3), oma = c(3,3,0,0), mgp = c(2,0.35,0), tcl = -0.15, mar = rep(0.25, 4), cex.axis = 1.2)
 for (y in unique(dat$year)) length_panel(boot_samps, "adult", y, "M", ifelse(y == 2008, TRUE, FALSE), c(0, 2))
 mtext(side = 1, outer = TRUE, line = 1.75, "Length (mm)")
-mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny")
+mtext(side = 2, outer = TRUE, line = 1.5, "Adult Progeny per Successful Male")
 dev.off()
 
 ##### MODEL-PREDICTED RELATIVE REPRODUCTIVE SUCCESS MEASURES #####
