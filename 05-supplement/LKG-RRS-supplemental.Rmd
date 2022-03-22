@@ -138,7 +138,7 @@ summary_table("total_juv_grand")
 summary_table("adult_grand")
 ```
 
-# Progeny Per Spawner Histograms: Option 1 {.tabset .tabset-pills}
+# Progeny Per Spawner Histograms {.tabset .tabset-pills}
 
 These histograms show the within-brood year, among-spawner variability in reproductive success to different progeny life stages. Bars are generated at 1 progeny intervals in all cases, including the "zero progeny" group.
 
@@ -193,76 +193,6 @@ mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
 ```{r adult-grand-hist, fig.width = 8, fig.height = 7}
 par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
 x = sapply(2008:2012, function(y) hist_fn(y, "adult_grand", 1))
-mtext(side = 1, outer = TRUE, line = 0.75, "Number of Adult Grand-Progeny Assigned")
-mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
-```
-
-# Progeny Per Spawner Histograms: Option 2 {.tabset .tabset-pills}
-
-These histograms show the within-brood year, among-spawner variability in reproductive success to different progeny life stages. Bars are generated at 1 progeny intervals in all cases, including the "zero progeny" group.
-
-```{r hist-fn2}
-hist_fn = function(year_keep, progeny_type, axis_by, legend) {
-  # extract the progeny counts for this year and type
-  y = subset(dat, year == year_keep)[,progeny_type]
-  y_use = y[!is.na(y)]
-  o = subset(dat, year == year_keep)[,"origin"]
-  o = o[!is.na(y)]
-  y = y_use
-  
-  # build a histogram in increments of 1 (including 0 group)
-  z = factor(y, levels = 0:max(y))
-  HOR_counts = table(z[o == "H"])
-  NOR_counts = table(z[o == "W"])
-  counts = rbind(HOR = HOR_counts, NOR = NOR_counts)
-  
-  mp = barplot(counts, space = 0, col = c("salmon", "skyblue"), border = "white", main = year_keep, names.arg = rep("", ncol(counts)))
-  
-  # create axis
-  mp = as.numeric(mp)
-  names(mp) = colnames(counts)
-  lab_x = as.character(seq(0, max(y), axis_by))
-  axis(side = 1, at = mp[lab_x], labels = lab_x, xpd = F)
-  
-  # create legend
-  if (legend) {
-    legend("topright", bty = "n", legend = c("HOR", "NOR"), col = c("salmon", "skyblue"), pch = 15, pt.cex = 2)
-  }
-}
-```
-
-## **Figure S1a.** Juvenile Progeny {-}
-
-```{r total_juv-hist2, fig.width = 8, fig.height = 7}
-par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
-x = sapply(2008:2016, function(y) hist_fn(y, "total_juv", 5, ifelse(y == 2008, T, F)))
-mtext(side = 1, outer = TRUE, line = 0.75, "Number of Juvenile Progeny Assigned")
-mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
-```
-
-## **Figure S1b.** Adult Progeny {-}
-
-```{r adult-hist2, fig.width = 8, fig.height = 7}
-par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
-x = sapply(2008:2016, function(y) hist_fn(y, "adult", 1, ifelse(y == 2008, T, F)))
-mtext(side = 1, outer = TRUE, line = 0.75, "Number of Adult Progeny Assigned")
-mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
-```
-
-## **Figure S1c.** Juvenile Grand-Progeny {-}
-
-```{r tota_juv-grand-hist2, fig.width = 8, fig.height = 7}
-par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
-x = sapply(2008:2012, function(y) hist_fn(y, "total_juv_grand", 5, ifelse(y == 2008, T, F)))
-mtext(side = 1, outer = TRUE, line = 0.75, "Number of Juvenile Grand-Progeny Assigned")
-mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
-```
-
-## **Figure S1d.** Adult Grand-Progeny {-}
-
-```{r adult-grand-hist2, fig.width = 8, fig.height = 7}
-par(mfrow = c(3,3), mgp = c(2,0.35,0.25), mar = c(1,1,2,1), tcl = -0.15, oma = c(2,2,0,0), xaxs = "i", yaxs = "i")
-x = sapply(2008:2012, function(y) hist_fn(y, "adult_grand", 1, ifelse(y == 2008, T, F)))
 mtext(side = 1, outer = TRUE, line = 0.75, "Number of Adult Grand-Progeny Assigned")
 mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
 ```
