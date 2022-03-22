@@ -5,10 +5,13 @@ rm(list = ls(all = TRUE))
 # load functions used in multiple analyses
 source("common-functions.R")
 
-# choose settings
-# progeny_type = "Juv"
-progeny_type = "Adult"
-n_boot = 1000
+# read command line arguments
+args = commandArgs(trailingOnly = TRUE)
+progeny_type = as.character(args[1])
+n_boot = as.numeric(args[2])
+make_figures = as.logical(args[3])
+
+# set the reference group, i.e., the denominator in RRS ratios
 ref = "HxH"
 
 # directory to save output to
@@ -29,6 +32,7 @@ dat$cross_type = factor(dat$cross_type, levels = c("NxN", "HxN", "NxH", "HxH"))
 # both data sets have no zeros. untruncated versions had poor QQ-plot of standardized residuals
 # this is because count models with low predicted values have a decent amount of expected zeros
 # use of truncated dist is justified because data includes only non-zero progeny crosses
+# not a hurdle model because no model to explain presence of zeros
 
 # fit models
 cat("\nFitting Models\n")
@@ -38,9 +42,9 @@ fit2 = glmmTMB::glmmTMB(progeny ~ cross_type + year, data = dat, family = glmmTM
 fit3 = glmmTMB::glmmTMB(progeny ~ cross_type * year, data = dat, family = glmmTMB::truncated_nbinom2)
 
 # perform AIC to select the best model
-cat("\nAIC Table:\n\n")
-AICtab = AIC(fit0, fit1, fit2, fit3); AICtab
-best_mod = rownames(AICtab)[which.min(AICtab[,"AIC"])]
+cat("\nAICc Table:\n\n")
+AICtab = MuMIn::AICc(fit0, fit1, fit2, fit3); AICtab
+best_mod = rownames(AICtab)[which.min(AICtab[,"AICc"])]
 best_mod = eval(parse(text = best_mod))
 
 # function to create a prediction data set: all year and cross type combos
@@ -119,3 +123,17 @@ boot_preds = cbind(progeny_type = progeny_type, boot_preds, ratios)
 # save output for use by later scripts
 saveRDS(best_mod, file.path(out_dir, paste0(progeny_type, "-best-fit.rds")))
 saveRDS(boot_preds, file.path(out_dir, paste0(progeny_type, "-boot-samps.rds")))
+
+# determine if output for both progeny types now exists
+both_analyses_done = all(c("Juv-best-fit.rds", "Adult-best-fit.rds") %in% basename(list.files(out_dir)))
+
+# return message if figures requested but cannot be made
+if (!both_analyses_done & make_figures) {
+  message("\nFigures were requested, however output from only one of the two progeny types was found. No output figures will be produced.")
+}
+
+# produce the plots if requested
+if (make_figures & both_analyses_done) {
+  cat("\nProducing Figures")
+  source("03-cross-types/cross-type-plots.R")
+}

@@ -1,10 +1,14 @@
-
+# clear the workspace
 rm(list = ls(all = TRUE))
 
-suppressPackageStartupMessages({
-  library(dplyr)
+# load dplyr: makes summarizing value for plot easier
+suppressWarnings({
+  suppressPackageStartupMessages({
+    library(dplyr)
+  })
 })
 
+# set directory to save output
 out_dir = "03-cross-types/model-output"
 
 # file names
@@ -13,12 +17,14 @@ in_files = list.files(out_dir, pattern = "boot", full.names = TRUE)
 # read in both progeny types and combine into one data set
 boot_out = do.call(rbind, lapply(in_files, readRDS))
 
+# extract only the columns that store the ratios
 ratio_cols = stringr::str_which(colnames(boot_out), "\\:")
 ratios_only = boot_out[,c("progeny_type", "year", "iter", colnames(boot_out)[ratio_cols])]
 
 # convert to long format
 ratios = reshape2::melt(ratios_only, id.vars = c("year", "progeny_type", "iter"), value.name = "rrs", variable.name = "type")
 
+# extract the numerator and denominator of the ratios
 ref = unique(substr(ratios$type, 5, 7))
 ratios$type = substr(ratios$type, 1, 3)
 
@@ -35,6 +41,7 @@ border_cols = c("black", "grey30", "grey60")
 # set resolution
 ppi = 600
 
+# prepare the estimates for barplotting
 prep_for_barplot = function(progeny_keep) {
   # obtain the point estimates of ratios based on original data set
   # formatted for barplotting
