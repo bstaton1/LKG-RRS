@@ -1,4 +1,4 @@
-> This repository stores the code and data used to perform the GL(M)M analyses presented in the manuscript _Improved productivity of naturalized spring Chinook salmon following reintroduction using a hatchery stock into Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, submitted for publication.
+> This repository stores the code and data used to perform the GL(M)M analyses presented in the manuscript _Improved productivity of naturalized spring Chinook salmon following reintroduction using a hatchery stock into Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, currently in preparation.
 
 ## Repo Organization
 
@@ -25,22 +25,23 @@ All analyses that use random number generators (e.g., parametric bootstrapping) 
 
 All GL(M)M analyses were conducted in R (v4.0.2). Many R packages were used, listed below in general order of their centrality to our analysis (i.e., core model fitting/diagnostics packages listed before general-purpose data preparation packages):
 
-| Package Name | Version Used | Purpose                                                 |
-| ------------ | ------------ | ------------------------------------------------------- |
-| `glmmTMB`    | 1.0.2.1      | Fitting of GL(M)Ms                                      |
-| `MuMIn`      | 1.43.17      | Model selection tasks                                   |
-| `DHARMa`     | 0.3.3.0      | Model assumption diagnostics                            |
-| `lme4`       | 1.1.23       | Parametric bootstrapping via `lme4::boot.mer()`         |
-| `emmeans`    | 1.7.2        | Performing multiple comparisons                         |
-| `parallel`   | 4.0.2        | Parallel processing                                     |
-| `snow`       | 0.4.3        | Parallel processing                                     |
-| `stringr`    | 1.4.0        | Character string manipulations                          |
-| `reshape2`   | 1.4.4        | Data reformatting, e.g., from long to wide              |
-| `lubridate`  | 1.7.9        | Handling dates                                          |
-| `dplyr`      | 1.0.0        | Summarizing large output data frames                    |
-| `bookdown`   | 0.20         | R markdown output formats that include cross references |
-| `knitr`      | 1.29         | Rendering R markdown files                              |
-| `kableExtra` | 1.3.4.9000   | Formatting of tables generated with `knitr::kable()`    |
-| `details`    | 0.2.1        | Creating collapsible output in R markdown               |
-| `scales`     | 1.1.1        | Creating transparent colors                             |
+| Package Name | Version Used | Purpose                                                      |
+| ------------ | ------------ | ------------------------------------------------------------ |
+| `glmmTMB`    | 1.0.2.1      | Fitting of GL(M)Ms                                           |
+| `MuMIn`      | 1.43.17      | Model selection tasks                                        |
+| `DHARMa`     | 0.3.3.0      | Model assumption diagnostics                                 |
+| `lme4`       | 1.1.23       | Parametric bootstrapping via `lme4::boot.mer()`              |
+| `emmeans`    | 1.7.2        | Performing multiple comparisons                              |
+| `parallel`   | 4.0.2        | Parallel processing                                          |
+| `snow`       | 0.4.3        | Parallel processing                                          |
+| `stringr`    | 1.4.0        | Character string manipulations                               |
+| `reshape2`   | 1.4.4        | Data reformatting, e.g., from long to wide                   |
+| `abind`      | 1.4.5        | Creating higher-dimensional arrays from lower-dimensional arrays |
+| `lubridate`  | 1.7.9        | Handling dates                                               |
+| `dplyr`      | 1.0.0        | Summarizing large output data frames                         |
+| `bookdown`   | 0.20         | R markdown output formats that include cross references      |
+| `knitr`      | 1.29         | Rendering R markdown files                                   |
+| `kableExtra` | 1.3.4.9000   | Formatting of tables generated with `knitr::kable()`         |
+| `details`    | 0.2.1        | Creating collapsible output in R markdown                    |
+| `scales`     | 1.1.1        | Creating transparent colors                                  |
 
