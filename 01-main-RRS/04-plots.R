@@ -184,10 +184,15 @@ day_panel = function(boot_out, progeny_keep, year_keep, sex_keep, legend, ylim) 
   }
   
   # draw on better x-axis: show the first of each month
-  # FIXME: remove StatonMisc dependency
   if (year_keep %in% xaxt_yrs) {
+    full_dates = seq(lubridate::as_date("2009-01-01"), lubridate::as_date("2009-12-31"), by = "day")
+    full_doy = 1:365
+    full_months = lubridate::month(full_dates)
+    full_days = lubridate::day(full_dates)
+    full_dates = paste0(full_months, "/", full_days)
+    
     all_doy = min(dat$day_raw):max(dat$day_raw)
-    all_dates = StatonMisc::doy2date(all_doy, year = 2009, include_year = FALSE)
+    all_dates = full_dates[full_doy %in% all_doy]
     axis_keep = which(all_dates %in% c("5/1", "6/1", "7/1", "8/1", "9/1"))
     
     axis(side = 1, at = all_doy[axis_keep], labels = c("May", "Jun", "Jul", "Aug", "Sep"))
