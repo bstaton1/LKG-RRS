@@ -1,6 +1,6 @@
 ---
 title: "Supplemental Material"
-subtitle: "_Improved productivity of naturalized spring Chinook salmon following reintroduction using a hatchery stock into Lookingglass Creek, Oregon_"
+subtitle: "_Improved productivity of naturalized spring Chinook salmon following reintroduction from a hatchery stock in Lookingglass Creek, Oregon_"
 author: "H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower"
 output: 
   bookdown::html_document2:
