@@ -199,16 +199,16 @@ mtext(side = 2, outer = TRUE, line = 0.75, "Number of Spawners")
 
 # Additional Hurdle Model Output {.tabset .tabset-pills}
 
-The top model for juvenile progeny included effects for sex, length, arrival date, origin, and year in the conditional model.
+The top model for juvenile progeny included effects for sex, length, arrival day, origin, and year in the conditional model.
 The figures in this section show patterns quantified by the hurdle model that we did not believe there was space to show in the main text.
 
 ## **Figure S2** (Categorical) {- .tabset .tabset-pills}
 
-These figures display the expected reproductive success by hurdle model output type, calculated at the average value of the length and arrival date values for each year, sex, and origin.
+These figures display the expected reproductive success by hurdle model output type, calculated at the average value of the length and arrival day values for each year, sex, and origin.
 
 ### **(a)** Females {-}
 
-_This figure is included in the main text (Figure X therein), but is included here for ease of comparison to males._
+_This figure is included in the main text (Figure 3 therein), but is included here for ease of comparison to males._
 
 ```{r}
 include_graphics(file.path(getwd(), "01-main-RRS/figures/fitted-categories-female.png"))
@@ -237,9 +237,9 @@ include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-contin
 include_graphics(file.path(getwd(), "01-main-RRS/figures/total_juv-fitted-continuous-length-males.png"))
 ```
 
-## **Figure S4** (Continuous -- Arrival Date) {- .tabset .tabset-pills}
+## **Figure S4** (Continuous -- Arrival Day) {- .tabset .tabset-pills}
 
-The figures below show the expected number of progeny per spawner (successful and unsuccessful spawners combined) as a function of arrival date.
+The figures below show the expected number of progeny per spawner (successful and unsuccessful spawners combined) as a function of arrival day.
 The x-axis range that each curve takes on reflects the range of the specific sex/origin combination took on that year.
 
 ### **(a)** Females {-}
@@ -548,11 +548,11 @@ barplot(rbind(my_pmf, their_pmf), beside = TRUE)
 # Sensitivity Analysis: Juvenile RRS with Parr and Smolt Separated
 
 Although the previous analysis (i.e., the beta-binomial regression) illustrated overall validity in our assumption that HOR and NOR spawners were assigned parr and smolt at relatively equal rates, we wished to verify that our inference was not impacted by our summation of parr and smolt into a "total juvenile" reproductive success metric.
-To do this, we disaggregated the "total juvenile" metric into its components, and replicated the analyses for question #1 (i.e., fit hurdle models with covariates for sex, origin, arrival date, length, year, and interactions; AIC~c~ model selection; bootstrap RRS ratios from best model; determine how frequently CIs of RRS ratio overlap 1) separately for parr and smolt progeny per spawner.
+To do this, we disaggregated the "total juvenile" metric into its components, and replicated the analyses for question #1 (i.e., fit hurdle models with covariates for sex, origin, arrival day, length, year, and interactions; AIC~c~ model selection; bootstrap RRS ratios from best model; determine how frequently CIs of RRS ratio overlap 1) separately for parr and smolt progeny per spawner.
 
 ## Model Selection Results {-}
 
-As shown in Table S2 below, the top model for parr progeny was the same as found for total juvenile progeny as part of our main text analysis for question #1, and included terms for arrival date, spawner size, origin, sex, and year in the conditional model and origin and year in the zero model.
+As shown in Table S2 below, the top model for parr progeny was the same as found for total juvenile progeny as part of our main text analysis for question #1, and included terms for arrival day, spawner size, origin, sex, and year in the conditional model and origin and year in the zero model.
 This makes intuitive sense because parr make up the majority of the total juvenile production (as shown in the beta-binomial analysis above).
 The best smolt-only model also included effects for length, origin, and year in the conditional model and origin and year in the zero model.
 
