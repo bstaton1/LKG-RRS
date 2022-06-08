@@ -1,4 +1,10 @@
-> This repository stores the code and data used to perform the GL(M)M analyses presented in the manuscript __Improved productivity of naturalized spring Chinook salmon following reintroduction from a hatchery stock in Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, currently in preparation.
+> This repository stores the code used to perform the GL(M)M analyses presented in the manuscript __Improved productivity of naturalized spring Chinook salmon following reintroduction from a hatchery stock in Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, currently in review.
+
+## Data Ownership
+
+To conform with data sharing practices followed by the data owners, the Confederated Tribes of the Umatilla Indian Reservation (CTUIR) & the Oregon Department of Fish and Wildlife, and to honor principles of Indigenous Data Sovereignty, the raw data files are not available in this repository. If you would like access to these data so that you may execute the scripts with that data set, please contact the following: Hayley Nuetzel at [hnuetzel@critfc.org](mailto:hnuetzel@critfc.org), Gene Shippentower at [geneshippentower@ctuir.org](mailto:geneshippentower@ctuir.org), Les Naylor at [lesnaylor@ctuir.org](mailto:lesnaylor@ctuir.org), and Carrie Crump at [carriecrump@ctuir.org](mailto:carriecrump@ctuir.org).
+
+The input files to the relative reproductive success analyses found in this repo contain the results from parentage assignment analyses, which can be reproduced using the code found in the repo [hnuetzel/Lookingglass-Creek-spring-Chinook-RRS](https://github.com/hnuetzel/Lookingglass-Creek-spring-Chinook-RRS).
 
 ## Repo Organization
 
