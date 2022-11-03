@@ -1,4 +1,8 @@
-> This repository stores the code used to perform the GL(M)M analyses presented in the manuscript _Improved productivity of naturalized spring Chinook salmon following reintroduction from a hatchery stock in Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, currently in review.
+> This repository stores the code used to perform the GL(M)M analyses presented in the manuscript _Improved productivity of naturalized spring Chinook salmon following reintroduction from a hatchery stock in Lookingglass Creek, Oregon_ by H.M. Nuetzel, P.F. Galbreath, B.A. Staton, C.A. Crump, L.M. Naylor, and G.E. Shippentower, accepted for publication in the _Canadian Journal of Fisheries and Aquatic Sciences_.
+
+[![ArticleDOI](https://img.shields.io/badge/Article%20DOI-10.1139%2Fcjfas--2022--0114-blue)](https://doi.org/10.1139/cjfas-2022-0114)
+
+[![GitHub Repo Archive DOI](https://img.shields.io/badge/GitHub%20Repo%20Archive%20DOI-10.5281%2Fzenodo.6621724-blue)](https://doi.org/10.5281/zenodo.6621724)
 
 ## Data Ownership
 
