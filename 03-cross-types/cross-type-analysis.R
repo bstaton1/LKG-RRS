@@ -75,9 +75,7 @@ simfit = function(fit) {
   if (is.character(new_fit)) {
     return(rep(NA, nrow(make_pred_data(fit))))
   } else {
-    mu = predict(new_fit, newdata = make_pred_data(fit), type = "cond")
-    phi = predict(new_fit, newdata = make_pred_data(fit), type = "disp")
-    pred = sapply(1:length(mu), function(i) get_expected_resp(mu[i], phi[i], 0))
+    pred = predict(new_fit, newdata = make_pred_data(fit), type = "response")
     return(pred)
   }
 }
@@ -94,9 +92,7 @@ stoptime = Sys.time()
 stoptime - starttime
 
 # obtain the fitted values for original non-bootstrapped data
-mu = predict(best_mod, newdata = make_pred_data(best_mod), type = "cond")
-phi = predict(best_mod, newdata = make_pred_data(best_mod), type = "disp")
-original_ests = sapply(1:length(mu), function(i) get_expected_resp(mu[i], phi[i], 0))
+original_ests = predict(best_mod, newdata = make_pred_data(best_mod), type = "response")
 boot_preds = cbind(original_ests, boot_preds)
 
 # assign iteration names; original dataset is iter_0
