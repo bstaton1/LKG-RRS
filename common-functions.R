@@ -133,39 +133,6 @@ diag_resids = function(resids, return_pvals = TRUE) {
   }
 }
 
-##### FUNCTIONS FOR CALCULATING EXPECTED VALUES THAT ACCOUNT FOR ZERO-TRUNCATION #####
-
-# probability mass function for glmmTMB::nbinom2
-# https://mc-stan.org/docs/2_20/functions-reference/nbalt.html
-# variance the same as described in glmmTMB::nbinom2 family description
-# x: a random variable, should be an integer
-# mu: the expected value of the negative binomial distribution
-# phi: the overdispersion parameter of the negative binomial distribution
-dnbinom2 = function(x, mu, phi) {
-  choose(x + phi - 1, x) * (mu/(mu + phi))^x * (phi/(mu + phi))^phi
-}
-
-# probability mass function for glmmTMB::truncated_nbinom2
-dtnbinom2 = function(x, mu, phi) {
-  ifelse(x == 0, {
-    0
-  }, {
-    dnbinom2(x, mu, phi)/(1 - dnbinom2(0, mu, phi))
-  }) 
-}
-
-# obtain E(y) for all y (including y == 0 and y > 0)
-get_expected_resp = function(mu, phi, zprob) {
-  x_vals = 0:1000
-  sum(dtnbinom2(x_vals, mu, phi) * x_vals) * (1 - zprob)
-}
-
-# obtain E(y) for only y > 0
-get_expected_cond = function(mu, phi) {
-  x_vals = 1:1000
-  sum(dtnbinom2(x_vals, mu, phi) * x_vals)
-}
-
 # obtain the names of all of these objects so they are not removed later
 custom_fn_names = ls()
 

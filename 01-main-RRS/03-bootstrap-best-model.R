@@ -64,16 +64,10 @@ predict_model = function(fit) {
   # build data frame for prediction: individual years, all combos of covariates
   pred_data = make_pred_data()
   
-  # obtain negative binomial parameters at each combo of prediction covariates
-  mu  = predict(fit, pred_data, type = "cond")  # mu parameter of truncated_nbinom2
-  phi = predict(fit, pred_data, type = "disp")  # phi parameter of truncated_nbinom2
-  pi  = predict(fit, pred_data, type = "zprob") # probability of not crossing hurdle
-  
-  # obtain the expected values from the model at each combo of prediction covariates
-  # these account for the truncation when calculating the expected value
-  pred_data$resp  = sapply(1:nrow(pred_data), function(i) get_expected_resp(mu[i], phi[i], pi[i]))
-  pred_data$cond  = sapply(1:nrow(pred_data), function(i) get_expected_cond(mu[i], phi[i]))
-  pred_data$nzprb = 1 - pi
+  # obtain expected values at each combo of prediction covariates
+  pred_data$cond  = predict(fit, pred_data, type = "conditional")  # conditional mean: expected value of all non-zero counts
+  pred_data$resp  = predict(fit, pred_data, type = "response")  # response mean: expected value of all counts
+  pred_data$nzprb = 1 - predict(fit, pred_data, type = "zprob") # probability of crossing hurdle
   
   # convert to long format across prediction types
   pred_data = reshape2::melt(pred_data, id.vars = c("year", "origin", "sex", "day", "length", "day_raw", "length_raw", "is_mean_day", "is_mean_length"))
@@ -107,7 +101,7 @@ my_cluster = snow::makeSOCKcluster(ncpus)
 snow::clusterEvalQ(my_cluster, {library("lme4"); library("glmmTMB")})
 
 # send the necessary objects to the cluster
-snow::clusterExport(my_cluster, c("fit", "predict_model", "make_pred_data", "dnbinom2", "dtnbinom2", "get_expected_resp", "get_expected_cond", "dat"))
+snow::clusterExport(my_cluster, c("fit", "predict_model", "make_pred_data", "dat"))
 
 # run the bootstrap
 boot_out = lme4::bootMer(fit, FUN = function(x) predict_model(x)$out, nsim = nboot,
